@@ -1,0 +1,83 @@
+﻿@using ClubTecTask.Utilities
+@model PaginatedList<ClubTecTask.Models.CitiesList>
+
+<h2>רשימת יישובים</h2>
+
+<!-- Отображение ошибок -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<!-- Форма для добавления нового города -->
+<form asp-action="AddCity" method="post">
+    <div class="form-group">
+        <label for="cityName">הוסף יישוב חדש</label>
+        <input type="text" name="cityName" class="form-control" placeholder="שם יישוב" required />
+    </div>
+    <button type="submit" class="btn btn-primary">הוסף</button>
+</form>
+
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().Name)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (ViewData["EditId"] != null && (int)ViewData["EditId"] == item.Id)
+                    {
+                        <!-- Форма редактирования города -->
+                        <form asp-action="EditCity" method="post">
+                            <div class="form-group">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="text" name="cityName" class="form-control" value="@item.Name" required />
+                                <button type="submit" class="btn btn-primary mt-2">שמור</button>
+                                <a asp-action="Index" class="btn btn-secondary mt-2">ביטול</a>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.Name)
+                    }
+                </td>
+                <td>
+                    <!-- Форма для удаления города -->
+                    <form asp-action="DeleteCity" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-danger">מחק</button>
+                    </form>
+                    <!-- Кнопка для перехода в режим редактирования -->
+                    <form asp-action="Edit" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-warning">ערוך</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Пагинация -->
+<div class="d-flex justify-content-between">
+    @if (Model.HasNextPage)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)" class="btn btn-primary">הבא</a>
+    }
+    <div></div> <!-- Пустой div для разделения кнопок -->
+    @if (Model.HasPreviousPage)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)" class="btn btn-primary">הקודם</a>
+    }
+</div>
